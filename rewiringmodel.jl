@@ -1,5 +1,6 @@
 using Pkg
 Pkg.activate("Rewiring")
+# Pkg.instantiate() # to install necessary packages.
 
 using DifferentialEquations
 using Graphs
@@ -28,20 +29,20 @@ using ProgressMeter
 const FUNCTIONAL_RESPONSE = :type_II  # Options: :type_I, :type_II, :type_III
 
 # Rewiring toggles
-ENABLE_EXTINCTION_REWIRING = true   # Rewire when last prey goes extinct
+ENABLE_EXTINCTION_REWIRING = false  # Rewire when last prey goes extinct
 ENABLE_ENERGY_REWIRING = false      # Rewire when energy intake < mortality
 ENABLE_DYNAMIC_REPLACEMENT = false   # Randomly replace least profitable link (Kondoh Eq. 2)
 ENABLE_INVASION = false             # Causes solver issues - currently disabled
 
 # Species capabilities
-FRACTION_CAN_REWIRE = 0.0           # Fraction of consumers that can rewire (0.0-1.0)
+FRACTION_CAN_REWIRE = 1.0           # Fraction of consumers that can rewire (0.0-1.0)
 FRACTION_CAN_ADAPT = 1.0         # Fraction of consumers that can adapt foraging (0.0-1.0)
 
 # Rewiring parameters
 const ENERGY_THRESHOLD_FACTOR = 1.0      # θ: rewire when intake < θ * mortality 
 const ENERGY_REWIRING_INTERVAL = 10.0    # How frequently to check energy rewiring condition.
 const DYNAMIC_REPLACEMENT_RATE = 0.1     # Events per time unit per consumer (increased from 0.01)
-const REWIRING_COST = 0.0               # Reduction in attack rate for new prey (0-1)
+const REWIRING_COST = 0.25               # Reduction in attack rate for new prey (0-1)
 
 # Rewiring constraints (to prevent unrealistic rapid rewiring)
 const REWIRING_COOLDOWN = 10.0           # Minimum time between rewiring events per species
@@ -62,7 +63,7 @@ const MIN_PREDATOR_PREY_MASS_RATIO = 1.0 # Predator must be >= this times prey m
 const MAX_PREDATOR_PREY_MASS_RATIO = 100.0 # Predator must be <= this times prey mass
 
 # Adaptation parameters
-ADAPTATION_RATE = 0.25                   # G: speed of foraging effort adjustment (set to 0 to disable)
+ADAPTATION_RATE = 0.25                   # G: speed of foraging effort adjustment
 
 # Invasion parameters
 const INVASION_RATE = 0.01               # Probability per time unit
@@ -203,12 +204,12 @@ function initialize_parameters(adjacency::Matrix{Bool};
 
     # Growth rates for basal species
     r = zeros(S)
-    r[1:n_basal] .= rand(Uniform(0.001, 0.05), n_basal)
+    r[1:n_basal] .= rand(Uniform(0.005, 0.05), n_basal)
     # r[1:n_basal] .= rand(Uniform(0.01, 0.1), n_basal) #Gilljam default r ~ U(0.01,0.1)
 
     # Mortality rates for consumers 
     d = zeros(S)
-    d[(n_basal+1):S] .= rand(Uniform(0.001, 0.01), S - n_basal)
+    d[(n_basal+1):S] .= rand(Uniform(0.001, 0.005), S - n_basal)
     # d[(n_basal+1):S] .= rand(Uniform(0.001, 0.01), S - n_basal) #Gilljam default d ~ U(0.001,0.01)
 
     # Carrying capacities for basal species 
@@ -227,7 +228,7 @@ function initialize_parameters(adjacency::Matrix{Bool};
     conversion_eff = zeros(S, S)
     for i in 1:S, j in 1:S
         if adjacency[i, j]
-            conversion_eff[i, j] = rand(Uniform(0.1, 0.3))
+            conversion_eff[i, j] = rand(Uniform(0.2, 0.4))
         end
     end
 
@@ -1156,7 +1157,7 @@ function single_run(params::FoodWebParameters, state::AdaptiveState;
     # Get initial condition
     if USE_RANDOM_INITIAL || !isnothing(u0)
         if isnothing(u0)
-            N0 = rand(Uniform(1.0, 5.0), params.S)
+            N0 = rand(Uniform(1.0, 2.0), params.S)
             a0 = vec(state.foraging_efforts)
             u0 = vcat(N0, a0)
         end
