@@ -18,3 +18,4 @@ As run, the script should produce a picture of the initial graph, a picture of t
 
 - USE_RANDOM_INITIAL needs to be set to 'true' - eventually there will be an option to automatically find stable equlibria (where all species persist without adaptation/rewiring) to use as ICs.
 - Currently invasions don't work because they cause issues with the ODE solver due to resizing of the system. ENABLE_INVASION should be set to false.
+- I still need to figure out "reasonable" parameter choices - e.g. choices that recover the findings of Gilljam and Kondoh in each scenario, and how to balance those mechanisms.
