@@ -14,6 +14,8 @@ The script is (or will be) capable of simulating many different rewiring scenari
 ## Output
 As run, the script should produce a picture of the initial graph, a picture of the final graph, a picture of the population timeseries, and some summary/log files of the simulation. These will be refined and more will be added.
 
+![image](timeseries.png)
+
 ## Current issues
 
 - USE_RANDOM_INITIAL needs to be set to 'true' - eventually there will be an option to automatically find stable equlibria (where all species persist without adaptation/rewiring) to use as ICs.
